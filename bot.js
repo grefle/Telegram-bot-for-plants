@@ -32,8 +32,8 @@ bot.on('text', async (ctx) => {
 bot.command('help', help);
 
 // Додамо обробники для редагування та видалення рослин
-bot.hears('Видалити рослину', deletePlant);
-bot.hears('Редагувати рослину', editPlant);
+bot.action(/^deletePlant_.+$/, deletePlant);
+bot.action(/^editPlant_.+$/, editPlant);
 
 module.exports = bot;
 
