@@ -8,8 +8,8 @@ async function getMyPlants(ctx) {
 
         for (const plant of plants) {
             const keyboard = [
-                Markup.button.callback(`Видалити ${plant.name}`, `delete_${plant._id}`),
-                Markup.button.callback(`Редагувати ${plant.name}`, `edit_${plant._id}`)
+                Markup.button.callback(`Видалити ${plant.name}`, `deletePlant_${plant._id.toString()}`),
+                Markup.button.callback(`Редагувати ${plant.name}`, `editPlant_${plant._id.toString()}`)
             ];
 
             const message = `Рослина: ${plant.name}\nБіологічна назва: ${plant.scientificName}\nЧастота поливу: ${plant.wateringFrequency} днів`;
@@ -159,4 +159,11 @@ function help(ctx) {
     ctx.reply(helpMessage);
 }
 
-module.exports = { getMyPlants, getMyReminders, addPlant, help, deletePlant, editPlant, };
+module.exports = {
+  getMyPlants,
+  getMyReminders,
+  addPlant,
+  help,
+  deletePlant,
+  editPlant
+};
