@@ -123,26 +123,15 @@ async function editPlant(ctx) {
     try {
         // Отримайте _id рослини з callback-даних
         const plantIdToEdit = ctx.callbackQuery.data.split('_')[1];
-        // Реалізуйте редагування рослини за _id
-        const plantToEdit = await Plant.findById(plantIdToEdit);
+        // Питайте користувача ввести нові дані для редагування
+        ctx.reply(
+            'Введіть нові дані для редагування рослини в форматі:\n\n' +
+            'Назва: ...\nБіологічна назва: ...\nЧастота поливань: ...\n' +
+            'Умови росту: ...\nКоротка інформація: ...\nКартинка рослини: ...'
+        );
 
-        if (plantToEdit) {
-            // Тут ви можете оновити відомості про рослину
-            // Наприклад, оновити назву рослини
-            // Оновлення назви рослини згідно вашої логіки
-            plantToEdit.name = 'Нова назва рослини';
-
-            // Зберегти оновлену рослину
-            const updatedPlant = await plantToEdit.save();
-
-            if (updatedPlant) {
-                ctx.answerCbQuery(`Рослину з ID ${plantIdToEdit} відредаговано.`);
-            } else {
-                ctx.answerCbQuery(`Не вдалося відредагувати рослину з ID ${plantIdToEdit}.`);
-            }
-        } else {
-            ctx.answerCbQuery(`Не вдалося знайти рослину з ID ${plantIdToEdit}.`);
-        }
+        // Зберігайте _id рослини в контексті для подальшого використання
+        ctx.session.editingPlantId = plantIdToEdit;
     } catch (error) {
         console.error('Помилка при редагуванні рослини: ', error);
         ctx.reply('Сталася помилка при редагуванні рослини.');
