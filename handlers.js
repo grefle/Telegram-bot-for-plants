@@ -12,7 +12,7 @@ async function getMyPlants(ctx) {
                 Markup.button.callback(`Редагувати ${plant.name}`, `editPlant_${plant._id.toString()}`)
             ];
 
-            const message = `Рослина: ${plant.name}\nБіологічна назва: ${plant.scientificName}\nЧастота поливу: ${plant.wateringFrequency} днів`;
+            const message = `Назва: ${plant.name}\nБіологічна назва: ${plant.scientificName}\nЧастота поливань: ${plant.wateringFrequency} днів\nУмови росту: ${plant.growthConditions}\nКоротка інформація: ${plant.shortInfo}\nКартинка рослини: ${plant.plantImage}`;
 
             await ctx.reply(message, Markup.inlineKeyboard([keyboard]));
         }
@@ -73,7 +73,7 @@ async function addPlant(ctx) {
             // Якщо дані не розбиті, розбиваємо текст повідомлення
             plantInfo = plantInfo.split('\n');
         }
-
+        
         const name = plantInfo[0] ? plantInfo[0].split(': ')[1].trim() : '';
         const scientificName = plantInfo[1] ? plantInfo[1].split(': ')[1].trim() : '';
         const wateringFrequency = plantInfo[2] ? parseInt(plantInfo[2].split(': ')[1].trim()) : 0;
@@ -104,7 +104,6 @@ async function deletePlant(ctx) {
     try {
         // Отримайте _id рослини з callback-даних
         const plantIdToDelete = ctx.callbackQuery.data.split('_')[1];
-        // Реалізуйте видалення рослини за _id
         const deletedPlant = await Plant.findByIdAndDelete(plantIdToDelete);
 
         if (deletedPlant) {
@@ -123,15 +122,28 @@ async function editPlant(ctx) {
     try {
         // Отримайте _id рослини з callback-даних
         const plantIdToEdit = ctx.callbackQuery.data.split('_')[1];
-        // Питайте користувача ввести нові дані для редагування
-        ctx.reply(
-            'Введіть нові дані для редагування рослини в форматі:\n\n' +
-            'Назва: ...\nБіологічна назва: ...\nЧастота поливань: ...\n' +
-            'Умови росту: ...\nКоротка інформація: ...\nКартинка рослини: ...'
-        );
 
-        // Зберігайте _id рослини в контексті для подальшого використання
-        ctx.session.editingPlantId = plantIdToEdit;
+        const plantToEdit = await Plant.findById(plantIdToEdit);
+
+        if (plantToEdit) {
+            plantToEdit.name = 'Нова назва рослини';
+            plantToEdit.scientificName = '';
+            plantToEdit.wateringFrequency = '';
+            plantToEdit.growthConditions = '';
+            plantToEdit.shortInfo = '';
+            plantToEdit.plantImage = '';
+
+            // Зберегти оновлену рослину
+            const updatedPlant = await plantToEdit.save();
+
+            if (updatedPlant) {
+                ctx.answerCbQuery(`Рослину з ID ${plantIdToEdit} відредаговано.`);
+            } else {
+                ctx.answerCbQuery(`Не вдалося відредагувати рослину з ID ${plantIdToEdit}.`);
+            }
+        } else {
+            ctx.answerCbQuery(`Не вдалося знайти рослину з ID ${plantIdToEdit}.`);
+        }
     } catch (error) {
         console.error('Помилка при редагуванні рослини: ', error);
         ctx.reply('Сталася помилка при редагуванні рослини.');
@@ -139,13 +151,18 @@ async function editPlant(ctx) {
 }
 
 function help(ctx) {
-    const helpMessage = `Допомога:
+    const helpMessage = `🌿Допомога:🌿
   /start - Почати спілкування з ботом
   Мої рослини - Переглянути свої рослини
   Мої нагадування - Переглянути графік поливань на тиждень
   Додати рослину - Додати нову рослину до списку
   `;
     ctx.reply(helpMessage);
+    const formatData = `
+    ❗️❕❗️Зверніть увагу❗️❕❗️
+При додаванні нової рослини в рядку "Частота поливань" потрібно вказати частоту в днях, а в рядку "Картинка рослини" - емоджі рослини
+  `;
+  ctx.reply(formatData);
 }
 
 module.exports = {
